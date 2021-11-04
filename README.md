@@ -3,6 +3,6 @@ Encode the n-queens problem into the DIMACS CNF format and solve it by SAT solve
 
 Developers:
 
-Ti'Ara Carroll
-Claudia Gallosa
+Ti'Ara Carroll \n
+Claudia Gallosa \n
 Nabonita Mitra
