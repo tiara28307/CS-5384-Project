@@ -10,6 +10,7 @@ function getNQueens(n, row, positions, validPositions) {
   // check if at the end of the board
   if(row === n) {
     const board = generateBoard(positions);
+    // generateCNF(n, board);
     validPositions.push(board);
 
     return validPositions
@@ -42,8 +43,8 @@ function generateBoard(pos) {
       if(pos[i] === j) boardPositions[i] += 'Q';
       else boardPositions[i] += '.';
     }
-
   }
+
   return boardPositions
 }
 
@@ -66,11 +67,35 @@ function isValid(pos) {
   return true;
 }
 
+function generateCNF(n, board) {
+  gameBoard = [n][n];
+  let counter = 1;
+  // Initialization of game board
+  for(let i = 0; i < n; i++) {
+    for(let j = 0; j < n; j++) {
+      // Identifier number for each variable, required by dimacs format
+      gameBoard[i][j] = counter;
+      counter++;
+    }
+  }
+
+  const cnfLists = [];
+
+  // Generate boolean clauses for each horizontal row
+  for(let i = 0; i < n; i++) {
+    const literalList = [];
+    for(let j = 0; j < n; j++) {
+      literalList.add(gameBoard[i][j]);
+    }
+    HorizontalRows(literalList.size(), literalList, cnfLists);
+  }
+}
+
 // prompt user for input n
 const n = parseInt(prompt('Enter value for n: '));
 
 // check if valid input
-if (n < 1 || n > 4 ) {
+if (n < 1 || n > 10 ) {
   console.log('n must be greater than 0 and less than 5');
   return;
 } else {
