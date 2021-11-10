@@ -42,10 +42,10 @@ function rows(n, cnfList, gameBoard) {
 
     for(let i = 0; i < literals.length - 1; i++) {
       for(let j = i + 1; j < literals.length; j++) {
-        clauseList = [];
-        clauseList.push(-literals[i]);
-        clauseList.push(-literals[j]);
-        cnfList.push(clauseList);
+        clauses = [];
+        clauses.push(-literals[i]);
+        clauses.push(-literals[j]);
+        cnfList.push(clauses);
       }
     }
   }
@@ -143,7 +143,7 @@ const n = prompt('Enter value for n: ');
 
 // Check if valid input
 if (n < 1 || n > 10 ) {
-  console.log('n must be greater than 0 and less than 5');
+  console.log('n must be greater than 0 and less than 11');
   return;
 } else {
   nQueens(parseInt(n));
