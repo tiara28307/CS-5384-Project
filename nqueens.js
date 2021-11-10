@@ -1,104 +1,150 @@
 const prompt = require('prompt-sync')();
+const fs = require('fs');
+const StringBuilder = require('string-builder');
+const nboard = require('n-board');
 
-// main function that initiates nQueens problem algorithm
+// Main function that initiates nQueens problem algorithm
 function nQueens(n) {
-  return getNQueens(n, 0, [], [])
+  cnfList = [];
+  // Create the chess board
+  board = createBoard(n);
+
+  // Checks rows, columns, and diagonals for valid positions for n queens
+  rows(n, cnfList, board);
+  columns(n, cnfList, board);
+  diagonals(n, cnfList, board);
+  // Generates a cnf file with the possible positions for n queens
+  generateCnfFile(n, cnfList)
 }
 
-// gets all possible solutions for n queens on n x n board
-function getNQueens(n, row, positions, validPositions) {
-  // check if at the end of the board
-  if(row === n) {
-    const board = generateBoard(positions);
-    // generateCNF(n, board);
-    validPositions.push(board);
-
-    return validPositions
-  } else {
-    // loop through positions on board to check for valid positions to place queen
-    // uses a stack to evaluate current position
-    for(let i = 0; i < n; i++) {
-      positions.push(i);
-      if(isValid(positions)) {
-        validPositions = getNQueens(n, row+1, positions, validPositions);
-      }
-      // pop position from stack to move to the next position in board
-      positions.pop();
-    }
-  }
-
-  return validPositions
-}
-
-// create board with valid queen positions
-function generateBoard(pos) {
-  const boardPositions = [];
-
-  for(let i = 0; i < pos.length; i++) {
-    boardPositions.push('');
-  }
-
-  for(let i = 0; i < boardPositions.length; i++) {
-    for(let j = 0; j < boardPositions.length; j++) {
-      if(pos[i] === j) boardPositions[i] += 'Q';
-      else boardPositions[i] += '.';
-    }
-  }
-
-  return boardPositions
-}
-
-// n-queens algorithm
-// check that position does not have a queen, is not in the same row, column, or diagonal of another queen
-function isValid(pos) {
-  const row = pos.length-1;
-  const column = pos[pos.length-1];
-
-  for(let i = 0; i < pos.length-1; i++) {
-    const currentRow = i;
-    const currentCol = pos[i];
-    const leftDiagonal = currentCol - (row - currentRow);
-    const rightDiagonal = currentCol + (row - currentRow);
-
-    if((column === currentCol) || (column === leftDiagonal || column === rightDiagonal)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-function generateCNF(n, board) {
-  gameBoard = [n][n];
+// Generates a chess board with each position numbered for DIMACS format
+function createBoard(n) {
+  const gameBoard = nboard(n);
   let counter = 1;
-  // Initialization of game board
-  for(let i = 0; i < n; i++) {
-    for(let j = 0; j < n; j++) {
-      // Identifier number for each variable, required by dimacs format
+
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
       gameBoard[i][j] = counter;
       counter++;
     }
   }
+  return gameBoard;
+}
 
-  const cnfLists = [];
-
-  // Generate boolean clauses for each horizontal row
+// Gets literals for queens and clause list based on rows
+function rows(n, cnfList, gameBoard) {
   for(let i = 0; i < n; i++) {
-    const literalList = [];
+    literals = [];
     for(let j = 0; j < n; j++) {
-      literalList.add(gameBoard[i][j]);
+      literals.push(gameBoard[i][j]);
     }
-    HorizontalRows(literalList.size(), literalList, cnfLists);
+    cnfList.push(literals);
+
+    for(let i = 0; i < literals.length - 1; i++) {
+      for(let j = i + 1; j < literals.length; j++) {
+        clauseList = [];
+        clauseList.push(-literals[i]);
+        clauseList.push(-literals[j]);
+        cnfList.push(clauseList);
+      }
+    }
   }
 }
 
-// prompt user for input n
-const n = parseInt(prompt('Enter value for n: '));
+// Gets literals for queens and clause list based on columns
+function columns(n, cnfList, gameBoard) {
+  for(let i = 0; i < n; i++) {
+    literals = [];
+    for(let j = 0; j < n; j++) {
+      literals.push(gameBoard[j][i]);
+    }
+    cnfList.push(literals);
 
-// check if valid input
+    for(let i = 0; i < literals.length - 1; i++) {
+      for(let j = i + 1; j < literals.length; j++) {
+        clauses = [];
+        clauses.push(-literals[i]);
+        clauses.push(-literals[j]);
+        cnfList.push(clauses);
+      }
+    }
+  }
+}
+
+// Gets literals for queens and clause list based on all possible diagonals
+function diagonals(n, cnfList, gameBoard) {
+  for(let i = 0; i < n - 1; i++) {
+    literals = [];
+    for(let j = 0; j < n - i; j++) {
+      literals.push(gameBoard[j][j + i]);
+    }
+    diagonalLines(literals, cnfList);
+  }
+
+  for(let i = 1; i < n - 1; i++) {
+    literals = [];
+    for(let j = 0; j < n - i; j++) {
+      literals.push(gameBoard[j + i][j]);
+    }
+    diagonalLines(literals, cnfList);
+  }
+
+  for(let i = 0; i < n -1; i++) {
+    literals = [];
+    for(let j = 0; j < n - i; j++) {
+      literals.push(gameBoard[j][n - 1 - (j + i)]);
+    }
+    diagonalLines(literals, cnfList);
+  }
+
+  for(let i = 1; i < n -1; i++) {
+    literals = [];
+    for(let j = 0; j < n - i; j++) {
+      literals.push(gameBoard[j + i][n - 1 - j]);
+    }
+    diagonalLines(literals, cnfList);
+  }
+}
+
+function diagonalLines(literals, cnfList) {
+  for(let i = 0; i < literals.length - 1; i++) {
+    for(let j = i + 1; j < literals.length; j++) {
+      clauses = [];
+      clauses.push(-literals[i]);
+      clauses.push(-literals[j]);
+      cnfList.push(clauses);
+    }
+  }
+}
+
+// Generated cnf file for SAT solver
+function generateCnfFile(n, cnfList) {
+  filePath = n + 'queens' + '.cnf';
+  const sb = new StringBuilder();
+
+  sb.append('c CNF File for n queens problem for SAT Solver\n');
+  sb.append("c\n");
+  sb.append("p cnf " + n * n + " " + cnfList.length + "\n");
+
+  for(let i = 0; i < cnfList.length; i++) {
+      sb.append(cnfList[i] + ' 0\n');
+  }
+
+  const data = sb.toString().replace(/,/g, ' ');
+  fs.writeFile(filePath, data, function (err) {
+    if (err) {
+      return console.log('Write to file error: ', err);
+    }
+  });
+}
+
+// Prompt user for input n
+const n = prompt('Enter value for n: ');
+
+// Check if valid input
 if (n < 1 || n > 10 ) {
   console.log('n must be greater than 0 and less than 5');
   return;
 } else {
-  console.log(nQueens(n));
-  // generate cnf
+  nQueens(parseInt(n));
 }
