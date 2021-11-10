@@ -6,14 +6,18 @@ const nboard = require('n-board');
 // Main function that initiates nQueens problem algorithm
 function nQueens(n) {
   cnfList = [];
+  // Create the chess board
   board = createBoard(n);
 
+  // Checks rows, columns, and diagonals for valid positions for n queens
   rows(n, cnfList, board);
   columns(n, cnfList, board);
   diagonals(n, cnfList, board);
+  // Generates a cnf file with the possible positions for n queens
   generateCnfFile(n, cnfList)
 }
 
+// Generates a chess board with each position numbered for DIMACS format
 function createBoard(n) {
   const gameBoard = nboard(n);
   let counter = 1;
@@ -27,6 +31,7 @@ function createBoard(n) {
   return gameBoard;
 }
 
+// Gets literals for queens and clause list based on rows
 function rows(n, cnfList, gameBoard) {
   for(let i = 0; i < n; i++) {
     literals = [];
@@ -46,6 +51,7 @@ function rows(n, cnfList, gameBoard) {
   }
 }
 
+// Gets literals for queens and clause list based on columns
 function columns(n, cnfList, gameBoard) {
   for(let i = 0; i < n; i++) {
     literals = [];
@@ -65,6 +71,7 @@ function columns(n, cnfList, gameBoard) {
   }
 }
 
+// Gets literals for queens and clause list based on all possible diagonals
 function diagonals(n, cnfList, gameBoard) {
   for(let i = 0; i < n - 1; i++) {
     literals = [];
@@ -110,6 +117,7 @@ function diagonalLines(literals, cnfList) {
   }
 }
 
+// Generated cnf file for SAT solver
 function generateCnfFile(n, cnfList) {
   filePath = n + 'queens' + '.cnf';
   const sb = new StringBuilder();
