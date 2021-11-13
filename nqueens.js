@@ -28,6 +28,7 @@ function createBoard(n) {
       counter++;
     }
   }
+  // console.log(gameBoard);
   return gameBoard;
 }
 
