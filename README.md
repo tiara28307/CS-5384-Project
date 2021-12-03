@@ -5,7 +5,10 @@ Encode the n-queens problem into the DIMACS CNF format and solve it by SAT solve
 Must have the following installed to run program:
 - Node.js: https://nodejs.org/en/download/
 - NPM
-- Minisat: http://minisat.se/
+- MiniSat: 
+  - Site: http://minisat.se/
+  - MacOS: ``brew install minisat`` 
+  - Windows: [Minisat on Windows](http://web.cecs.pdx.edu/~hook/logicw11/Assignments/MinisatOnWindows.html)
 
 ## Run
 1. Install npm dependencies: ``npm install``
